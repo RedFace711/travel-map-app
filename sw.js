@@ -1,14 +1,14 @@
 // Offline support: the app itself is network-first (so updates arrive),
 // map libraries and world shapes are cached forever, map tiles are cached as you browse.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const APP = 'app-' + VERSION;
 const LIBS = 'libs-v1';
 const TILES = 'tiles-v2';
 const MAX_TILES = 3000;
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png'];
+const SHELL = ['./', 'index.html', 'style.css?v=3', 'app.js?v=3', 'manifest.webmanifest', 'icons/icon-192.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(APP).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(APP).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -38,7 +38,8 @@ async function cacheFirst(req, name) {
 async function networkFirst(req) {
   const cache = await caches.open(APP);
   try {
-    const res = await fetch(req);
+    // Skip the browser's HTTP cache so a new version shows up on the next open.
+    const res = await fetch(req, { cache: 'no-cache' });
     if (res.ok) cache.put(req, res.clone());
     return res;
   } catch (e) {
