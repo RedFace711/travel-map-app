@@ -135,13 +135,43 @@ function pointInPolygon(lng, lat, poly) {
   return true;
 }
 function countryAt(lat, lng) {
+  // Coastal cities can fall just outside the simplified borders, so look around a little.
+  for (const d of [0, 0.25, 0.5]) {
+    for (const [dy, dx] of d ? [[d, 0], [-d, 0], [0, d], [0, -d], [d, d], [d, -d], [-d, d], [-d, -d]] : [[0, 0]]) {
+      const hit = countryAtExact(lat + dy, lng + dx);
+      if (hit) return hit;
+    }
+  }
+  return null;
+}
+function countryAtExact(lat, lng) {
   for (const f of worldFeatures) {
     const g = f.geometry;
     if (!g) continue;
     const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
-    if (polys.some(p => pointInPolygon(lng, lat, p))) return f.properties.name;
+    // Rings crossing the date line are unwrapped past ±180, so test both sides.
+    if (polys.some(p => pointInPolygon(lng, lat, p) || pointInPolygon(lng + 360, lat, p) || pointInPolygon(lng - 360, lat, p))) return f.properties.name;
   }
   return null;
+}
+
+// Countries crossing the date line (Russia, Fiji…) jump from 180 to -180,
+// which Leaflet draws as lines across the whole map. Make each ring continuous.
+function unwrapRings(geometry) {
+  if (!geometry) return;
+  const polys = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+  for (const poly of polys) {
+    for (const ring of poly) {
+      let offset = 0;
+      for (let i = 1; i < ring.length; i++) {
+        const prev = ring[i - 1][0];
+        let lng = ring[i][0] + offset;
+        if (lng - prev > 180) { offset -= 360; lng -= 360; }
+        else if (prev - lng > 180) { offset += 360; lng += 360; }
+        ring[i][0] = lng;
+      }
+    }
+  }
 }
 function matchCountryName(name) {
   if (!name) return null;
@@ -153,8 +183,8 @@ function matchCountryName(name) {
 
 const map = L.map('map', { worldCopyJump: true, zoomControl: false, minZoom: 2, tapHold: true }).setView([25, 10], 2);
 L.control.zoom({ position: 'topright' }).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap', maxZoom: 19
 }).addTo(map);
 map.createPane('pins').style.zIndex = 450;
 
@@ -179,7 +209,7 @@ async function loadWorld() {
     const res = await fetch(WORLD_URL);
     const topo = await res.json();
     const fc = topojson.feature(topo, topo.objects.countries);
-    fc.features.forEach(f => { f.properties.name = PRETTY[f.properties.name] || f.properties.name; });
+    fc.features.forEach(f => { f.properties.name = PRETTY[f.properties.name] || f.properties.name; unwrapRings(f.geometry); });
     worldFeatures = fc.features;
     countryNames = [...new Set(worldFeatures.map(f => f.properties.name))].sort((a, b) => a.localeCompare(b));
     geoLayer = L.geoJSON(fc, {

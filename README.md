@@ -16,4 +16,4 @@ All data is stored only on the device (no account, no server). Use ⚙︎ → *S
 2. iPhone: Safari → Share → **Add to Home Screen**. Android: Chrome → ⋮ → **Install app**.
 
 It opens full-screen like a normal app and works offline for places already loaded.
-Map data © OpenStreetMap contributors, tiles © CARTO, search by OpenStreetMap Nominatim.
+Map data © OpenStreetMap contributors, search by OpenStreetMap Nominatim.

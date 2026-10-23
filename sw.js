@@ -1,9 +1,9 @@
 // Offline support: the app itself is network-first (so updates arrive),
 // map libraries and world shapes are cached forever, map tiles are cached as you browse.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const APP = 'app-' + VERSION;
 const LIBS = 'libs-v1';
-const TILES = 'tiles-v1';
+const TILES = 'tiles-v2';
 const MAX_TILES = 3000;
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 
@@ -13,7 +13,7 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k.startsWith('app-') && k !== APP).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => (k.startsWith('app-') && k !== APP) || (k.startsWith('tiles-') && k !== TILES)).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
@@ -51,7 +51,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.hostname.includes('nominatim')) return; // search always needs the network
-  if (url.hostname.endsWith('basemaps.cartocdn.com')) return e.respondWith(cacheFirst(req, TILES));
+  if (url.hostname === 'tile.openstreetmap.org') return e.respondWith(cacheFirst(req, TILES));
   if (url.hostname === 'unpkg.com' || url.hostname === 'cdn.jsdelivr.net') return e.respondWith(cacheFirst(req, LIBS));
   if (url.origin === self.location.origin) return e.respondWith(networkFirst(req));
 });
