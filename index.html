@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>My Travel Map</title>
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Travel Map">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>My Travel Map</h1>
+      <p id="stats" class="stats"></p>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings &amp; backup">⚙︎</button>
+  </header>
+
+  <main>
+    <section id="view-map" class="view active">
+      <div id="map"></div>
+      <div class="map-legend">
+        <span><i class="lg visited"></i>Been</span>
+        <span><i class="lg wish"></i>Wishlist</span>
+      </div>
+      <p class="map-hint" id="mapHint">Tap a country to colour it · long-press to drop a place</p>
+    </section>
+    <section id="view-cities" class="view"></section>
+    <section id="view-wishlist" class="view"></section>
+    <section id="view-places" class="view"></section>
+    <section id="view-todo" class="view"></section>
+  </main>
+
+  <button class="fab" id="fab" aria-label="Add">+</button>
+
+  <nav class="tabbar">
+    <button data-view="map" class="active"><span>🗺️</span>Map</button>
+    <button data-view="cities"><span>🏙️</span>Cities</button>
+    <button data-view="wishlist"><span>⭐</span>Wishlist</button>
+    <button data-view="places"><span>📍</span>Places</button>
+    <button data-view="todo"><span>✅</span>To-do</button>
+  </nav>
+
+  <div id="sheetBackdrop" class="backdrop" hidden></div>
+  <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true"></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
