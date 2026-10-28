@@ -3,6 +3,7 @@
 A personal travel app that lives on my phone's home screen.
 
 - **Map** – tap a country to colour it as *Been* or *Wishlist* and pick its colour. Cities and places show as dots. Long-press anywhere to drop a city or place.
+- **PLAN 3D Map** - 3d second view world round ball where the visited places are shadowed as well as in the 2d view map.
 - **Cities** – every city I've been to, grouped by country, plus my visited countries.
 - **Wishlist** – countries and cities I want to visit.
 - **Places** – specific spots (restaurants, museums, beaches…), tick them off when visited.
